@@ -1,0 +1,81 @@
+import numpy as np
+import pandas as pd
+import sklearn.datasets
+import seaborn as sns
+from sklearn.datasets import load_diabetes
+diabetes = load_diabetes()
+import matplotlib.pyplot as plt 
+from scipy import stats
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from keras.models import Sequential
+from keras.layers import Dense
+from sklearn.metrics import mean_squared_error, r2_score
+df=pd.DataFrame(data=diabetes.data,columns=diabetes.feature_names)                          
+df
+df['target'] = diabetes.target
+df.head()
+df.shape
+df.info()
+df.duplicated()
+df.isnull().sum()
+df.select_dtypes(include="number").columns
+for i in ['age','sex', 'bmi', 'bp', 's1', 's2', 's3', 's4', 's5', 's6']:
+    sns.scatterplot(data=df, x=i, y='target')
+    plt.show()
+heat_map=df.select_dtypes(include="number").corr()
+plt.figure(figsize=(15,15))
+sns.heatmap(heat_map,annot=True)
+def detect_outliers_zscore(df):
+    outliers = {}
+    for column in df.select_dtypes(include=['float64', 'int64']).columns:
+        z_scores = stats.zscore(df[column])
+        outlier_indices = df[(z_scores > 3) | (z_scores < -3)].index.tolist()
+        outliers[column] = outlier_indices
+    return outliers
+# Find and print outliers
+outliers = detect_outliers_zscore(df)
+print(outliers)
+valid_outliers = [index for index in outliers if index in df.index]
+df_cleaned = df.drop(index=valid_outliers).reset_index(drop=True)
+x=df_cleaned.drop(columns="target")
+y=df["target"]
+x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2, random_state=42)
+x_train = scaler.fit_transform(x_train)
+x_test = scaler.transform(x_test)
+from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
+model = Sequential()
+model.add(Dense(units=11,activation="relu"))
+model.add(Dense(units=7,activation="relu"))
+model.add(Dense(units=5,activation="relu"))
+model.add(Dense(1, activation='softmax'))
+model.compile(optimizer='adam', loss='mean_squared_error')
+# training the model
+model_history = model.fit(x_train, y_train, epochs=50, batch_size=10, validation_split=0.2)
+loss=model.evaluate(x_test,y_test)
+print("Loss Functions:",loss)
+model.summary()
+predict=model.predict(x_test)
+mse=mean_squared_error(y_test, predict)
+mse
+r2=r2_score(y_test, predict)
+r2
+model_1= Sequential()
+model_1.add(Dense(units=32,activation="tanh"))
+model_1.add(Dense(units=16,activation="tanh"))
+model_1.add(Dense(1))
+model_1.compile(optimizer='adam', loss='mean_squared_error')
+model_history1 = model.fit(x_train, y_train, epochs=100, batch_size=10, validation_split=0.2)
+predict_2=model_1.predict(x_test)
+mse=mean_squared_error(y_test, predict_2)
+mse
+import matplotlib.pyplot as plt
+plt.plot(model_history.history['accuracy'], label='Train Accuracy')
+plt.plot(model_history.history['accuracy'], label='Validation Accuracy')
+plt.xlabel('Epoch')
+plt.ylabel('Accuracy')
+plt.legend()
+plt.show()
+
+
